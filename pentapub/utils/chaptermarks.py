@@ -45,20 +45,28 @@ def audacity_marker_to_xml(marker, root):
     link = get_link(title)
     attributes = dict(start=start_t.strftime(TIME_FORMAT))
     if link:
-        attributes['href'] = link
+        attributes.update({'href': link})
     for filter_pattern in [LINK_PATTERN, HASHTAG_PATTERN, BULLETPOINT_PATTERN]:
         title = re_filter(title, filter_pattern)
-        attributes['title'] = title
+        attributes.update({'title': title})
     etree.SubElement(root, ELEMENT_NAME, attributes)
+
+
+def chaptermark_from_file(filename):
+    ''' Return an AudacityChapterMarks generator from the given file. '''
+
+    with open(filename) as f:
+        for line in f.readlines():
+            yield AudacityChapterMarks._make(line.split('\t'))
 
 
 def audacity_to_podlove_chapters(filename):
     ''' getting a file which contains the audacity chaptermarks
         retruns the root element of podlove simple xml chaptermarks '''
 
-    with open(filename) as f:
-        root = etree.Element('chapters', dict(xmlns='http://podlove.de/simple-chapters'))
-        for line in f.readlines():
-            marker = AudacityChapterMarks._make(line.split('\t'))
-            audacity_marker_to_xml(marker, root)
-        return root
+    root = etree.Element('chapters', dict(xmlns='http://podlove.de/simple-chapters'))
+
+    for mark in chaptermark_from_file(filename):
+        audacity_marker_to_xml(mark, root)
+
+    return root
