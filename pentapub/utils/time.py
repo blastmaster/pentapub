@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, timedelta, time
 
 
 def get_fourth_tuesday(month):
@@ -37,3 +37,13 @@ def get_rec_date(year=None, month=None):
                  day=1)
     delta = get_fourth_tuesday(month_obj)
     return month_obj + delta
+
+
+def seconds_to_time(seconds):
+    ''' get seconds return a HMS time object '''
+
+    h = int(seconds / 3600)
+    m = int(seconds / 60) - h * 60
+    s = seconds % 60
+
+    return time(hour=h, minute=m, second=s)
