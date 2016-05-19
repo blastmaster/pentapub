@@ -109,16 +109,26 @@ class c3d2News:
 
         return self.news_from_date(production.date)
 
-    def write_news(self, production, chapterfile=None):
+    def write_news(self, production, chapterfile=None, outfile=None):
         ''' writes the resource tag to c3d2-web '''
 
         newsfile = self.news_from_production(production)
-        if not os.path.exists(newsfile):
-            raise ValueError('newsfile {0} does not exists'.format(newsfile))
+        if not outfile:
+            outfile = newsfile
         tree = etree.parse(newsfile)
         root = tree.getroot()
         resource_tag = build_c3d2_news_entry(production, chapterfile)
         root.append(resource_tag)
-        with open(newsfile, 'w', encoding='UTF-8') as f:
-            # TODO: pretty printing is not that much pretty! all in one line :(
-            f.write(etree.tostring(root, encoding='unicode', pretty_print=True))
+
+        # FIXME: if outfile is an open file like sys.stdout the call to open
+        # caused a TypeError. But we want to print to stdout so we need a
+        # exception. Is there a better way to handle this?
+
+        # TODO: bring some output where you wrinting to!
+
+        try:
+            f = open(outfile, 'w', encoding='UTF-8')
+        except TypeError:
+            f = outfile
+        # TODO: pretty printing is not that much pretty! all in one line :(
+        f.write(etree.tostring(root, encoding='unicode', pretty_print=True))
